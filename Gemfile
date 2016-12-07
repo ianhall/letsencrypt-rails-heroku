@@ -3,7 +3,7 @@ source "https://rubygems.org"
 gem 'acme-client', '~> 0.4.0'
 # SNI endpoints not supported yet:
 # <https://github.com/heroku/platform-api/issues/49>
-gem 'platform-api', github: 'jalada/platform-api', branch: 'master'
+gem 'platform-api', git: 'https://github.com/jalada/platform-api', branch: 'master'
 
 group :development do
   gem "shoulda", ">= 0"

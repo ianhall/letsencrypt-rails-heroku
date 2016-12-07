@@ -16,28 +16,28 @@ module Letsencrypt
 
   def self.process
     # Check configuration looks OK
-    unless Letsencrypt.configuration.valid?
-      raise "letsencrypt-rails-heroku is configured incorrectly. Are you missing an environment variable or other configuration? You should have a heroku_token, heroku_app, acmp_email and acme_domain configured either via a `Letsencrypt.configure` block in an initializer or as environment variables."
+    unless configuration.valid?
+      raise "letsencrypt-rails-heroku is configured incorrectly. Are you missing an environment variable or other configuration? You should have a heroku_token, heroku_app, acme_email and acme_domain configured either via a `Letsencrypt.configure` block in an initializer or as environment variables."
     end
 
     # Set up Heroku client
-    heroku = PlatformAPI.connect_oauth Letsencrypt.configuration.heroku_token
-    heroku_app = Letsencrypt.configuration.heroku_app
+    heroku = PlatformAPI.connect_oauth configuration.heroku_token
+    heroku_app = configuration.heroku_app
 
     # Create a private key
     print "Creating account key..."
     private_key = OpenSSL::PKey::RSA.new(4096)
     puts "Done!"
 
-    client = Acme::Client.new(private_key: private_key, endpoint: Letsencrypt.configuration.acme_endpoint, connection_options: { request: { open_timeout: 5, timeout: 5 } })
+    client = Acme::Client.new(private_key: private_key, endpoint: configuration.acme_endpoint, connection_options: { request: { open_timeout: 5, timeout: 5 } })
 
     print "Registering with LetsEncrypt..."
-    registration = client.register(contact: "mailto:#{Letsencrypt.configuration.acme_email}")
+    registration = client.register(contact: "mailto:#{configuration.acme_email}")
 
     registration.agree_terms
     puts "Done!"
 
-    domains = Letsencrypt.configuration.acme_domain.split(',').map(&:strip)
+    domains = configuration.acme_domain.split(',').map(&:strip)
 
     domains.each do |domain|
       puts "Performing verification for #{domain}:"
@@ -94,7 +94,7 @@ module Letsencrypt
     # Get certificate
     certificate = client.new_certificate(csr) # => #<Acme::Client::Certificate ....>
 
-    if Letsencrypt.configuration.acme_update_heroku_cert
+    if configuration.acme_update_heroku_cert
       # Send certificates to Heroku via API
 
       # First check for existing certificates:
